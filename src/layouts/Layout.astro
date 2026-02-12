@@ -1,0 +1,58 @@
+---
+const { title } = Astro.props;
+---
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title} | BlueNews Amazonfuturism</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style is:global>
+      :root {
+        --bg: #051410; /* Verde floresta ultra escuro */
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --accent: #00ff88; /* Neon Esmeralda */
+        --text: #e0f2f1; /* Branco levemente esverdeado */
+        --glass: rgba(10, 31, 26, 0.7);
+      }
+      body {
+        font-family: 'Roboto', sans-serif;
+        background-color: var(--bg);
+        background-image: radial-gradient(circle at 50% 50%, #0a251e 0%, #051410 100%);
+        color: var(--text);
+        margin: 0;
+        min-height: 100vh;
+      }
+      .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+      h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
+      
+      /* Efeito Glassmorphism para o Header */
+      header {
+        background: var(--glass);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="color: var(--accent); margin: 0; font-size: 1.8rem; letter-spacing: -1px;">
+          BLUE<span style="color: #fff;">NEWS</span>
+        </h1>
+        <nav><a href="/" style="color: #fff; text-decoration: none; font-weight: bold;">HOME</a></nav>
+      </div>
+    </header>
+    <main class="container" style="padding: 60px 20px;">
+      <slot />
+    </main>
+    <footer style="text-align: center; padding: 60px; color: rgba(255,255,255,0.3); font-size: 0.8rem;">
+      <p>&copy; 2049 BlueNews - Amazonfuturism Digital Portal</p>
+    </footer>
+  </body>
+</html>

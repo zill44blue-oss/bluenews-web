@@ -9,6 +9,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.17.1"
+    "airtable": "^0.12.2",
+    "astro": "^5.17.1",
+    "dotenv": "^17.2.4"
   }
 }
