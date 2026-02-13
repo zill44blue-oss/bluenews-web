@@ -1,35 +1,32 @@
 import Airtable from 'airtable';
 
-const base = new Airtable({ 
-  apiKey: import.meta.env.AIRTABLE_TOKEN 
-}).base(import.meta.env.BASE_ID);
-
 export async function getNoticias() {
+  const token = import.meta.env.AIRTABLE_TOKEN;
+  const baseId = import.meta.env.BASE_ID;
+
+  // Verifica se as chaves chegaram no ambiente de execução
+  if (!token || !baseId) {
+    return [{ Titulo: "ERRO: Chaves (Token ou BaseID) nao encontradas na Vercel", id: "erro-env" }];
+  }
+
+  const base = new Airtable({ apiKey: token }).base(baseId);
+
   try {
-    // Buscamos tudo da tabela 'Noticias' sem filtros de fórmula para evitar erros
-    const records = await base('Noticias').select({
-      sort: [{ field: 'Prioridade', direction: 'desc' }]
-    }).all();
+    // Busca bruta: traz qualquer coisa que estiver na tabela 'Noticias'
+    const records = await base('Noticias').select({ maxRecords: 5 }).all();
+    
+    if (records.length === 0) {
+        return [{ Titulo: "SINAL ZERO: Tabela encontrada, mas retornou vazia.", id: "vazio" }];
+    }
 
-    if (!records) return [];
-
-    // Filtramos e mapeamos os dados manualmente aqui (mais seguro)
-    return records
-      .map(record => ({
-        id: record.id,
-        Titulo: record.get('Titulo'),
-        Publicar: record.get('Publicar'),
-        Imagem: record.get('Imagem_URL') || '', 
-        Chapeu: record.get('Chapeu') || 'NOTÍCIA',
-        Destaque: record.get('Destaque') || false,
-        Tipo_Layout: record.get('Tipo_Layout') || 'Apenas Texto',
-        Slug: record.id, 
-        Subtitulo: record.get('Social_Share') || ''
-      }))
-      // Só deixa passar notícias que tenham Título e estejam com 'Publicar' marcado
-      .filter(n => n.Titulo && n.Publicar === true); 
-  } catch (error) {
-    console.error("Erro Crítico Airtable:", error);
-    return []; 
+    return records.map(record => ({
+      id: record.id,
+      Titulo: record.get('Titulo') || "Sem Titulo",
+      Imagem: record.get('Imagem_URL') || "",
+      Publicar: record.get('Publicar')
+    }));
+  } catch (e) {
+    // Captura o erro exato do Airtable (Permissão, Nome de Tabela, etc)
+    return [{ Titulo: `ERRO TECNICO: ${e.message}`, id: "erro-api" }];
   }
 }
