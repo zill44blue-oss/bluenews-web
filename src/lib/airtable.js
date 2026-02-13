@@ -4,18 +4,22 @@ const base = new Airtable({ apiKey: import.meta.env.AIRTABLE_TOKEN }).base(impor
 
 export async function getNoticias() {
   const records = await base('Noticias').select({
-    filterByFormula: "{Publicar} = 1", // Traz apenas o que você marcou com check verde
+    filterByFormula: "AND({Publicar} = 1, {Titulo} != '')", // Só traz se estiver publicado E tiver título
     sort: [{ field: 'Prioridade', direction: 'desc' }]
   }).all();
 
-  return records.map(record => ({
-    id: record.id,
-    Titulo: record.get('Titulo'), // Bate com sua coluna 'Titulo'
-    Imagem: record.get('Imagem_URL'), // MAPEA PARA O SEU CAMPO 'Imagem_URL'
-    Chapeu: record.get('Chapeu'), // Bate com sua coluna 'Chapeu'
-    Destaque: record.get('Destaque'), // Bate com seu checkbox 'Destaque'
-    Tipo_Layout: record.get('Tipo_Layout'), // Bate com seu Select 'Tipo_Layout'
-    Slug: record.id,
-    Subtitulo: record.get('Social_Share') // Usando sua coluna 'Social_Share' como apoio visual
-  }));
+  return records.map(record => {
+    const titulo = record.get('Titulo') || "Sem Titulo";
+    return {
+      id: record.id,
+      Titulo: titulo,
+      Imagem: record.get('Imagem_URL') || '', 
+      Chapeu: record.get('Chapeu') || '',
+      Destaque: record.get('Destaque') || false,
+      Tipo_Layout: record.get('Tipo_Layout') || 'Apenas Texto',
+      // Garante que o Slug nunca seja undefined para não quebrar o build
+      Slug: record.id, 
+      Subtitulo: record.get('Social_Share') || ''
+    };
+  });
 }

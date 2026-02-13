@@ -4,8 +4,10 @@ import { getNoticias } from '../../lib/airtable';
 
 export async function getStaticPaths() {
   const noticias = await getNoticias();
+  
+  // Cria os caminhos apenas para notícias que possuem um Slug válido
   return noticias.map((n) => ({
-    params: { slug: n.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-') },
+    params: { slug: n.Slug },
     props: { noticia: n },
   }));
 }
@@ -13,65 +15,18 @@ export async function getStaticPaths() {
 const { noticia } = Astro.props;
 ---
 
-<Layout title={noticia.titulo}>
-  <article style="max-width: 850px; margin: auto;">
-    <header style="text-align: center; margin-bottom: 50px;">
-      <span style="color: var(--accent); letter-spacing: 2px; font-weight: bold; font-size: 0.9rem;">// {noticia.tema}</span>
-      <h1 style="font-size: 3.5rem; line-height: 1; margin: 20px 0; color: #fff;">{noticia.titulo}</h1>
-      <p style="color: rgba(255,255,255,0.4);">SINC_DATA: {noticia.data}</p>
-    </header>
-
-    <figure style="margin: 0 0 40px 0;">
-      <img src={noticia.imagem} alt={noticia.titulo} style="width: 100%; border-radius: 20px; border: 1px solid rgba(0,255,136,0.2);" />
-      <figcaption style="font-size: 0.8rem; color: rgba(255,255,255,0.3); text-align: right; margin-top: 10px; font-style: italic;">
-        ORIGIN: {noticia.creditos}
-      </figcaption>
-    </figure>
-
-    <div class="content" style="font-size: 1.3rem; line-height: 1.9; color: rgba(255,255,255,0.85);">
-      <div set:html={noticia.corpo.replace(/\n/g, '<br><br>')} />
+<Layout title={noticia.Titulo}>
+  <article style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+    <span style="color: #c4170c; font-weight: 800; text-transform: uppercase;">{noticia.Chapeu}</span>
+    <h1 style="font-size: 3rem; margin: 20px 0; line-height: 1.1;">{noticia.Titulo}</h1>
+    <p style="font-size: 1.3rem; color: #666; margin-bottom: 30px;">{noticia.Subtitulo}</p>
+    
+    {noticia.Imagem && (
+      <img src={noticia.Imagem} style="width: 100%; border-radius: 8px; margin-bottom: 30px;" />
+    )}
+    
+    <div style="line-height: 1.8; font-size: 1.1rem;">
+      <p>Conteúdo da auditoria BlueNews em desenvolvimento...</p>
     </div>
-
-    <div style="margin: 80px 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.3;"></div>
-
-    <section id="comments" style="background: rgba(255,255,255,0.02); padding: 40px; border-radius: 20px; border: 1px solid rgba(0,255,136,0.1);">
-      <h2 style="color: var(--accent); margin-bottom: 30px;">Discussão do Terminal</h2>
-      <script src="https://giscus.app/client.js"
-              data-repo="SEU_USUARIO/SEU_REPO"
-              data-theme="dark"
-              data-lang="pt"
-              crossorigin="anonymous"
-              async>
-      </script>
-    </section>
   </article>
 </Layout>
-<script>
-  import { supabase } from '../../lib/supabase'; // Prepara a conexão para o futuro login
-
-  let tempoLeitura = 0;
-  // Captura o tema da notícia atual para bonificar a pauta correta
-  const pautaAtual = document.querySelector('[data-tema]')?.getAttribute('data-tema') || "Geral";
-
-  const timer = setInterval(() => {
-    tempoLeitura += 1;
-    console.log(`⏱️ Sincronizando atenção: ${tempoLeitura}s`);
-
-    if (tempoLeitura === 10) {
-      // 1. Acessa o acumulador local
-      let pendentes = JSON.parse(localStorage.getItem('bluenews_ativos') || '{"cycl": 0, "pautas": {}}');
-      
-      // 2. Incrementa a carga
-      pendentes.cycl += 1;
-      pendentes.pautas[pautaAtual] = (pendentes.pautas[pautaAtual] || 0) + 1;
-      
-      // 3. Salva na bateria de reserva (LocalStorage)
-      localStorage.setItem('bluenews_ativos', JSON.stringify(pendentes));
-      
-      // 4. Feedback Visual Amazonfuturista
-      alert(`⚡ SINAL CAPTADO! +1 Cycl acumulado em [${pautaAtual}]. Continue lendo para minerar mais ou salve no terminal!`);
-      
-      clearInterval(timer); // Finaliza o ciclo desta notícia
-    }
-  }, 1000);
-</script>
