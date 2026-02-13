@@ -3,40 +3,38 @@ import Layout from '../layouts/Layout.astro';
 import { getNoticias } from '../lib/airtable';
 
 const noticias = await getNoticias();
-
-// DISJUNTOR: Se não houver notícias, define um estado vazio para não quebrar o build
-const principal = noticias.find(n => n.Destaque === true) || noticias[0];
-
-const secundariasComFoto = noticias.filter(n => principal && n.id !== principal.id && n.Tipo_Layout === "Com Imagem").slice(0, 4);
-const apenasTexto = noticias.filter(n => principal && n.id !== principal.id && n.Tipo_Layout === "Apenas Texto").slice(0, 6);
+const principal = noticias.find(n => n.Destaque) || noticias[0];
 ---
 
-<Layout title="BlueNews - Portal Profissional">
-  {principal ? (
-    <>
-      <section style="margin: 20px 0 40px 0;">
-        <a href={`/n/${principal.Slug}`} style="text-decoration: none; color: inherit; display: grid; grid-template-columns: 2fr 1fr; gap: 20px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+<Layout title="BlueNews - Portal Oficial">
+  {noticias.length > 0 ? (
+    <main style="padding: 20px; max-width: 1200px; margin: 0 auto;">
+      <section style="margin-bottom: 40px;">
+        <a href={`/n/${principal.Slug}`} style="text-decoration: none; color: inherit; display: grid; grid-template-columns: 2fr 1fr; gap: 30px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
             <img src={principal.Imagem} style="width: 100%; height: 450px; object-fit: cover;" />
             <div style="padding: 40px; display: flex; flex-direction: column; justify-content: center;">
-                <span style="color: #c4170c; font-weight: 800; font-size: 0.75rem;">{principal.Chapeu}</span>
-                <h1 style="font-size: 2.5rem; margin: 15px 0; font-weight: 900; line-height: 1.1;">{principal.Titulo}</h1>
-                <p style="color: #666; font-size: 1.1rem;">{principal.Subtitulo}</p>
+                <span style="color: #c4170c; font-weight: 800;">{principal.Chapeu}</span>
+                <h1 style="font-size: 2.5rem; margin: 15px 0; font-weight: 900;">{principal.Titulo}</h1>
+                <p style="color: #666;">{principal.Subtitulo}</p>
             </div>
         </a>
       </section>
 
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
-        {secundariasComFoto.map(n => (
+        {noticias.slice(1, 9).map(n => (
           <a href={`/n/${n.Slug}`} style="text-decoration: none; color: inherit;">
-            <img src={n.Imagem} style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px;" />
-            <h3 style="font-size: 1rem; margin-top: 10px;">{n.Titulo}</h3>
+            <div style="background: #eee; height: 150px; border-radius: 8px; overflow: hidden; margin-bottom: 10px;">
+                <img src={n.Imagem} style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+            <h3 style="font-size: 1rem; font-weight: 700;">{n.Titulo}</h3>
           </a>
         ))}
       </div>
-    </>
+    </main>
   ) : (
     <div style="padding: 100px; text-align: center;">
-      <h2>Sinal em manutenção. Verifique o console da Vercel.</h2>
+      <h1>Sinal Zero</h1>
+      <p>Verifique se as noticias no Airtable estao marcadas como 'Publicar'.</p>
     </div>
   )}
 </Layout>

@@ -4,19 +4,26 @@ import { getNoticias } from '../../lib/airtable';
 
 export async function getStaticPaths() {
   const noticias = await getNoticias();
-  // Garante que o build só tente criar páginas para notícias reais
-  return noticias.map((n) => ({
-    params: { slug: n.Slug },
-    props: { noticia: n },
-  }));
+  
+  // SÓ GERA PÁGINAS SE O SLUG EXISTIR (DISJUNTOR DE SEGURANÇA)
+  return noticias
+    .filter(n => n.Slug) 
+    .map((n) => ({
+      params: { slug: n.Slug },
+      props: { noticia: n },
+    }));
 }
 
 const { noticia } = Astro.props;
 ---
-<Layout title={noticia?.Titulo || "Notícia"}>
-  <article style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
-    <h1 style="font-size: 3rem; font-weight: 900;">{noticia?.Titulo}</h1>
-    <p style="font-size: 1.4rem; color: #666; margin: 20px 0;">{noticia?.Subtitulo}</p>
-    <img src={noticia?.Imagem} style="width: 100%; border-radius: 12px;" />
+<Layout title={noticia?.Titulo}>
+  <article style="max-width: 800px; margin: 40px auto; padding: 0 20px; font-family: sans-serif;">
+    <span style="color: #c4170c; font-weight: bold;">{noticia?.Chapeu}</span>
+    <h1 style="font-size: 3rem; font-weight: 900; margin: 20px 0;">{noticia?.Titulo}</h1>
+    <p style="font-size: 1.4rem; color: #666;">{noticia?.Subtitulo}</p>
+    {noticia?.Imagem && <img src={noticia.Imagem} style="width: 100%; border-radius: 12px; margin-top: 30px;" />}
+    <div style="margin-top: 40px; line-height: 1.8; font-size: 1.2rem;">
+       <p>Conteúdo auditado pelo portal BlueNews.</p>
+    </div>
   </article>
 </Layout>
