@@ -1,28 +1,21 @@
 import Airtable from 'airtable';
-import dotenv from 'dotenv';
 
-dotenv.config();
-
-const base = new Airtable({ apiKey: process.env.AIRTABLE_TOKEN }).base(process.env.BASE_ID);
+const base = new Airtable({ apiKey: import.meta.env.AIRTABLE_TOKEN }).base(import.meta.env.BASE_ID);
 
 export async function getNoticias() {
-  try {
-    const records = await base('Noticias').select({
-      filterByFormula: '{Publicar} = 1',
-      sort: [{ field: 'Created', direction: 'desc' }]
-    }).all();
-    
-    return records.map(record => ({
-      id: record.id,
-      titulo: record.get('Título') || 'Sem Título',
-      corpo: record.get('blue_news') || '',
-      imagem: record.get('Imagem_URL') || 'https://placehold.co/600x400?text=BlueNews',
-      creditos: record.get('Creditos_Imagem') || 'Crédito não identificado',
-      tema: record.get('Tema') ? record.get('Tema')[0] : 'Geral',
-      data: record.get('Created') ? record.get('Created').slice(0, 10) : ''
-    }));
-  } catch (error) {
-    console.error("❌ Falha na leitura do Airtable:", error);
-    return [];
-  }
+  const records = await base('Noticias').select({
+    filterByFormula: "{Publicar} = 1", // Traz apenas o que você marcou com check verde
+    sort: [{ field: 'Prioridade', direction: 'desc' }]
+  }).all();
+
+  return records.map(record => ({
+    id: record.id,
+    Titulo: record.get('Titulo'), // Bate com sua coluna 'Titulo'
+    Imagem: record.get('Imagem_URL'), // MAPEA PARA O SEU CAMPO 'Imagem_URL'
+    Chapeu: record.get('Chapeu'), // Bate com sua coluna 'Chapeu'
+    Destaque: record.get('Destaque'), // Bate com seu checkbox 'Destaque'
+    Tipo_Layout: record.get('Tipo_Layout'), // Bate com seu Select 'Tipo_Layout'
+    Slug: record.id,
+    Subtitulo: record.get('Social_Share') // Usando sua coluna 'Social_Share' como apoio visual
+  }));
 }
