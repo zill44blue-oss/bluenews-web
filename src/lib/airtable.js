@@ -1,20 +1,25 @@
 import Airtable from 'airtable';
 
-const base = new Airtable({ apiKey: import.meta.env.AIRTABLE_TOKEN }).base(import.meta.env.BASE_ID);
+const base = new Airtable({ 
+  apiKey: import.meta.env.AIRTABLE_TOKEN 
+}).base(import.meta.env.BASE_ID);
 
 export async function getNoticias() {
   try {
     const records = await base('Noticias').select({
-      // Sintaxe reforçada: Checkbox marcado E título preenchido
-      filterByFormula: "AND({Publicar} = TRUE(), NOT({Titulo} = ''))",
+      // FÓRMULA BLINDADA: Checkbox Publicar ativo E Titulo preenchido
+      filterByFormula: "AND({Publicar}, {Titulo} != '')",
       sort: [{ field: 'Prioridade', direction: 'desc' }]
     }).all();
+
+    if (!records || records.length === 0) return [];
 
     return records.map(record => ({
       id: record.id,
       Titulo: record.get('Titulo') || "Sem Titulo",
+      // Mapeamento correto para sua coluna 'Imagem_URL'
       Imagem: record.get('Imagem_URL') || '', 
-      Chapeu: record.get('Chapeu') || 'NOTÍCIA',
+      Chapeu: record.get('Chapeu') || 'AUDITORIA',
       Destaque: record.get('Destaque') || false,
       Tipo_Layout: record.get('Tipo_Layout') || 'Apenas Texto',
       Slug: record.id, 
@@ -22,6 +27,6 @@ export async function getNoticias() {
     }));
   } catch (error) {
     console.error("Erro na captação do Airtable:", error);
-    return []; // Retorna lista vazia para não travar o build
+    return []; 
   }
 }
